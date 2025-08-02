@@ -134,7 +134,7 @@ To run this project locally, you’ll need:
 
 ## ⚖️ License
 
-This project is licensed under the **MIT License**. See the [LICENSE.md](LICENSE.md) file for full details.
+This project is licensed under the **MIT License**. See the [LICENSE.md](LICENSE.txt) file for full details.
 
 ---
 
