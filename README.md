@@ -134,7 +134,7 @@ To run this project locally, you’ll need:
 
 ## ⚖️ License
 
-This project is licensed under the **MIT License**. See the [LICENSE.md](https://github.com/Ricardohalog1/lrc-finder-pro/tree/main?tab=MIT-1-ov-file) file for full details.
+This project is licensed under the **MIT License**. See the [LICENSE.md](https://raw.githubusercontent.com/Ricardohalog1/lrc-finder-pro/refs/heads/main/LICENSE) file for full details.
 
 ---
 
