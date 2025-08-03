@@ -1,19 +1,13 @@
 <?php
 header('Content-Type: application/json');
 
-// --- API Endpoints ---
-$offline_api_url = 'http://localhost:3300/api/search'; // Ang iyong local server
-$online_api_url = 'https://lrclib.net/api/search';   // Ang online fallback
+$offline_api_url = 'http://localhost:3300/api/search';
+$online_api_url = 'https://lrclib.net/api/search';
 
-/**
- * Function to get contents from a URL.
- * It includes options to handle potential SSL errors on local servers.
- * It also sets a timeout to prevent long waits for an unresponsive offline server.
- */
 function fetch_lyrics_from_url($url) {
     $options = [
         "http" => [
-            "timeout" => 5, // Mag-give up after 5 seconds kung hindi ma-contact ang server
+            "timeout" => 5,
         ],
         "ssl" => [
             "verify_peer" => false,
@@ -24,10 +18,6 @@ function fetch_lyrics_from_url($url) {
     return @file_get_contents($url, false, $context);
 }
 
-/**
- * Function to process search results from an API response.
- * Returns an array of formatted results.
- */
 function process_results($response_json) {
     $file_results = [];
     $response_data = json_decode($response_json, true);
@@ -60,11 +50,7 @@ function process_results($response_json) {
     return $file_results;
 }
 
-
-// --- Main Logic ---
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // --- BATCH FINDER LOGIC ---
 
     $json_data = file_get_contents('php://input');
     $data = json_decode($json_data, true);
@@ -86,14 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             list($artist, $title) = array_map('trim', explode(' - ', $filename, 2));
         }
         
-        // --- Try OFFLINE first ---
         $offline_query_params = ['q' => "$artist $title"];
         $offline_request_url = $offline_api_url . '?' . http_build_query($offline_query_params);
         $response_json = fetch_lyrics_from_url($offline_request_url);
         
         $file_results = process_results($response_json);
 
-        // --- If OFFLINE fails or has no results, try ONLINE ---
         if (empty($file_results)) {
             $online_query_params = ['artist_name' => $artist, 'track_name' => $title];
             $online_request_url = $online_api_url . '?' . http_build_query($online_query_params);
@@ -101,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file_results = process_results($response_json);
         }
 
-        // --- Collate results ---
         if (!empty($file_results)) {
              $found_lyrics_collection[$track['baseName']] = [
                 'status' => 'found',
@@ -115,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo json_encode($found_lyrics_collection);
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // --- MANUAL SEARCH LOGIC (FIXED) ---
 
     $query = isset($_GET['q']) ? trim($_GET['q']) : '';
     if (empty($query)) {
@@ -123,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // --- 1. Try OFFLINE first ---
     $offline_query_params = ['q' => $query];
     $offline_request_url = $offline_api_url . '?' . http_build_query($offline_query_params);
     $response_json = fetch_lyrics_from_url($offline_request_url);
@@ -134,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // --- 2. If OFFLINE fails, try ONLINE with smarter parsing ---
     $artist_name = '';
     $track_name = '';
 
@@ -149,7 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $response_json = fetch_lyrics_from_url($online_request_url);
     $decoded_results = json_decode($response_json, true);
 
-    // --- 3. If smart parse fails, try a "catch-all" online search ---
     if (empty($decoded_results)) {
         $catch_all_params = ['artist_name' => $query, 'track_name' => $query];
         $online_request_url = $online_api_url . '?' . http_build_query($catch_all_params);
@@ -159,3 +138,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo $response_json ? $response_json : json_encode([]);
 }
 ?>
+
