@@ -12,17 +12,26 @@
 * ⚡ **Hybrid Search Architecture**: Prioritizes a high-speed **offline (local) server** for initial searches. If no results are found or the local server is unavailable, it seamlessly falls back to the **online `lrclib.net` API** for maximum reliability.
 * ✍️ **Interactive Revision**: If the first match isn't perfect, click the **"Revise"** button to open a modal and choose the correct lyrics from a list of alternatives provided by the API.
 * 🔍 **Inline Manual Search**: For tracks that weren't found, simply hover over the "Not Found" badge and click **"Manual Search"**. A modal will appear, allowing you to find lyrics without leaving the results page.
-* 📄 **Lyrics Preview Modal**: On the standalone Manual Search page, click any result to preview the full, timed lyrics in a clean interface before downloading.
 * 📦 **One-Click ZIP Download**: Download all successfully found .lrc files in one neat .zip archive, conveniently named after your source folder.
-* 🛡️ **Application Protection**: Includes a built-in license expiration check and disables developer tools to protect the application's integrity.
+
+## 🚀 Future Development: Native Android App
+
+To provide a fully integrated, standalone experience, the next major goal for this project is to evolve it into a **native Android application using Android Studio**.
+
+This architectural shift will involve:
+* **Rebuilding the UI** with native Android components (XML or Jetpack Compose).
+* **Rewriting the backend logic** (currently in PHP) in **Kotlin** or **Java**. This includes making direct API calls to `lrclib.net` from within the app.
+* **Integrating all utilities**, including the File Renamer and a future Duplicate Song Remover, directly into the app using native Android APIs for file system access.
+
+This will result in a true, installable mobile application that no longer requires a separate web server.
 
 ## 🐍 Bonus Utility: File Renamer
 
-Included in the project is a helpful Python script (`file_renamer.py`) to clean and standardize your music filenames before processing.
+Included in the suite is a standalone Python script (`file_renamer.py`) to clean and standardize your music filenames before processing.
 
 * **Reads Metadata**: Extracts Artist and Title tags from `.mp3`, `.flac`, and `.m4a` files.
-* **Cleans and Formats**: Removes junk text (like "Official Video", "Lyrics", etc.) and renames the file to a clean `Title - Artist.ext` format.
-* **Improves Accuracy**: Using this script first can significantly increase the success rate of the batch finder.
+* **Intelligent Formatting**: Removes superfluous text (e.g., "Official Video," "Lyrics") and renames the file to a clean `Title - Artist.ext` format.
+* **Improves Match Accuracy**: Using this script first significantly increases the success rate of the Batch Finder.
 
 ## 🛠️ Tech Stack
 
@@ -32,36 +41,10 @@ Included in the project is a helpful Python script (`file_renamer.py`) to clean 
 | **Backend** | PHP 8+                                                 |
 | **Web Server**| Apache (via XAMPP)                                     |
 | **Lyrics API**| Hybrid: Self-hosted `lrc-server` & Online `lrclib.net` |
-| **Database** | SQLite (from lrclib.net dump)                          |
 | **Helper Script**| Python 3                                            |
 
 ## 📁 Project Structure
-
-lrc-finder-pro/
-│
-├── api/
-│ ├── download.php
-│ └── search.php
-│
-├── assets/
-│ ├── css/
-│ │ └── style.css
-│ └── js/
-│ ├── 1219444622223.js // For Manual Search
-│ ├── 1219444658955.js // For Batch Finder
-│ └── tailwindcss.js
-│
-├── includes/
-│ ├── footer.php
-│ └── nav.php
-│
-├── search/
-│ └── index.php // Manual Search Page
-│
-├── file_renamer.py // Standalone utility
-├── index.php // Main Batch Finder Page
-└── README.md
-
+`lrc-finder-pro/` | `api/` | `download.php` | `search.php` | `assets/` | `css/` | `style.css` | `js/` | `1219444622223.js` // For Manual Search | `1219444658955.js` // For Batch Finder | `tailwindcss.js` | `includes/` | `footer.php` | `nav.php` | `search/` | `index.php` // Manual Search Page | `file_renamer.py` // Standalone utility | `index.php` // Main Batch Finder Page | `README.md`
 
 ## 🚀 Setup and Installation
 
@@ -80,7 +63,7 @@ For the fastest search experience, you can host the lyrics database locally.
     git clone [https://github.com/RiczzIoT/lrclib-fixed.git](https://github.com/RiczzIoT/lrclib-fixed.git)
     cd lrclib-fixed
     ```
-2.  **Download the Database**: Obtain the latest database dump from [lrclib.net Database Dumps]([https://db-dumps.lrclib.net/](https://db-dumps.lrclib.net/lrclib-db-dump-20250718T081344Z.sqlite3.gz).
+2.  **Download the Database**: Obtain the latest database dump from [lrclib.net Database Dumps]([https://db-dumps.lrclib.net/](https://db-dumps.lrclib.net/lrclib-db-dump-20250718T081344Z.sqlite3.gz)).
 3.  **Place the Database**: Extract the downloaded archive and move the `db.sqlite3` file into the `lrclib-fixed` directory.
 4.  **Run the Server**:
     ```bash
