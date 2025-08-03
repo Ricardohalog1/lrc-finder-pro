@@ -42,7 +42,6 @@ const createOptionDiv = (optionData) => {
     return optionDiv;
 };
 
-// --- UPDATED openModal FUNCTION ---
 const openModal = (track) => {
     currentTrackForModal = track;
     modalTitle.textContent = track.trackName || 'Unknown Title';
@@ -50,16 +49,14 @@ const openModal = (track) => {
     
     const lyricsContent = track.syncedLyrics || track.plainLyrics || 'No lyrics available.';
     modalLyrics.textContent = lyricsContent;
-    
-    // Enable download if ANY lyrics (synced or plain) are available.
+
     const hasLyrics = (track.syncedLyrics && track.syncedLyrics.trim() !== '') || (track.plainLyrics && track.plainLyrics.trim() !== '');
     modalDownloadBtn.disabled = !hasLyrics;
-    
-    // Change button text based on what will be downloaded
+
     if (hasLyrics) {
         modalDownloadBtn.textContent = 'Download .lrc';
     } else {
-        modalDownloadBtn.textContent = 'Download'; // Button will be disabled
+        modalDownloadBtn.textContent = 'Download';
     }
 
     lyricsModal.classList.remove('hidden');
@@ -136,19 +133,16 @@ lyricsModal.addEventListener('click', (e) => {
     }
 });
 
-// --- UPDATED Download Button Logic ---
 modalDownloadBtn.addEventListener('click', () => {
     if (!currentTrackForModal) return;
 
     const hasSynced = currentTrackForModal.syncedLyrics && currentTrackForModal.syncedLyrics.trim() !== '';
     const hasPlain = currentTrackForModal.plainLyrics && currentTrackForModal.plainLyrics.trim() !== '';
 
-    // Exit if there are no lyrics to download
     if (!hasSynced && !hasPlain) return;
 
-    // Prioritize synced lyrics, otherwise use plain lyrics
     const lyricsContent = hasSynced ? currentTrackForModal.syncedLyrics : currentTrackForModal.plainLyrics;
-    const fileExtension = '.lrc'; // ALWAYS .lrc
+    const fileExtension = '.lrc';
     
     const filename = `${currentTrackForModal.artistName || 'Unknown Artist'} - ${currentTrackForModal.trackName || 'Unknown Title'}`.replace(/[\/:*?"<>|]/g, '_') + fileExtension;
     
@@ -184,3 +178,4 @@ modalDownloadBtn.addEventListener('click', () => {
             document.body.innerHTML = ''; 
         }
     })();
+
