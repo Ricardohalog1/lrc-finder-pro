@@ -95,7 +95,7 @@ To run this project locally, you’ll need:
 
 1. **Copy the project folder** LRC-Finder-Pro/ into your htdocs folder (e.g., C:\\xampp\\htdocs\\).  
 2. **Start Apache** via the XAMPP Control Panel.  
-3. **Visit in Browser**: [http://localhost/LRC-Finder-Pro/](https://www.google.com/search?q=http://localhost/LRC-Finder-Pro/)
+3. **Visit in Browser**: [http://localhost/LRC-Finder-Pro/](http://localhost/lrc-finder-pro/)
 
 ### **🐍 Step 3 (Optional but Recommended): Clean Your Filenames**
 
