@@ -303,3 +303,4 @@ const folderInput = document.getElementById('music-folder-input');
             return optionDiv;
 
         }
+
