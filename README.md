@@ -51,26 +51,26 @@ This project follows a clean and organized structure for better maintainability.
 LRC-Finder-Pro/  
 │  
 ├── api/  
-│   ├── search.php          \# Handles BOTH batch and manual search queries  
-│   └── download.php        \# Handles .zip creation/download  
+│   ├── search.php  
+│   └── download.php  
 │  
 ├── assets/  
 │   ├── css/  
-│   │   └── style.css       \# Custom stylesheets  
+│   │   └── style.css  
 │   └── js/  
 │       ├── 1219444658955.js)  
 │       └── 1219444622223.js)  
 │  
 ├── includes/  
-│   ├── nav.php             \# Reusable navigation component  
-│   └── footer.php          \# Reusable footer component  
+│   ├── nav.php  
+│   └── footer.php  
 │  
 ├── search/  
-│   └── index.php           \# Manual Search page  
+│   └── index.php  
 │  
-├── index.php               \# Main batch processing interface (Batch Finder)  
-├── file\_renamer.py         \# Optional utility script to clean filenames  
-└── README.md               \# You're reading this\!
+├── index.php  
+├── file\_renamer.py  
+└── README.md
 
 ## **🚀 Setup and Installation**
 
