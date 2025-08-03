@@ -84,7 +84,9 @@ To run this project locally, you’ll need:
 
 1. Clone the repo:  
    git clone https://github.com/tranxuanthang/lrclib.git  
-   cd lrclib  
+   cd lrclib
+or
+   Fixed lrclib https://github.com/RiczzIoT/lrclib-fixed.git  
 2. **Download the Database:** Go to [lrclib.net Database Dumps](https://db-dumps.lrclib.net/lrclib-db-dump-20250718T081344Z.sqlite3.gz) and download the latest .sqlite3.gz file.  
 3. **Place the Database:** Extract and move db.sqlite3 into the lrclib folder.  
 4. Run the Server:  
