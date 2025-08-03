@@ -51,22 +51,22 @@ This project follows a clean and organized structure for better maintainability.
 LRC-Finder-Pro/  
 │  
 ├── api/  
-│   ├── search.php  
-│   └── download.php  
+│     ├── search.php  
+│     └── download.php  
 │  
 ├── assets/  
-│   ├── css/  
-│   │   └── style.css  
-│   └── js/  
-│       ├── 1219444658955.js)  
-│       └── 1219444622223.js)  
+│     ├── css/  
+│     │     └── style.css  
+│     └── js/  
+│          ├── 1219444658955.js)  
+│          └── 1219444622223.js)  
 │  
 ├── includes/  
-│   ├── nav.php  
-│   └── footer.php  
+│      ├── nav.php  
+│      └── footer.php  
 │  
 ├── search/  
-│   └── index.php  
+│      └── index.php  
 │  
 ├── index.php  
 ├── file\_renamer.py  
