@@ -118,7 +118,7 @@ To run this project locally, you’ll need:
 
 ## **⚖️ License**
 
-This project is licensed under the [**MIT License**](=MIT-1-ov-file).
+This project is licensed under the [**MIT License**](https://github.com/RiczzIoT/lrc-finder-pro/blob/main/LICENSE?tab=LICENSE-ov-file).
 
 ## **❤️ Credits and Acknowledgements**
 
