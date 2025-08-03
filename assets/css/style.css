@@ -1,0 +1,6 @@
+body { font-family: 'Inter', sans-serif; }
+        #results::-webkit-scrollbar, #revision-options::-webkit-scrollbar, #manual-search-results::-webkit-scrollbar { width: 8px; }
+        #results::-webkit-scrollbar-track, #revision-options::-webkit-scrollbar-track, #manual-search-results::-webkit-scrollbar-track { background: #1f2937; }
+        #results::-webkit-scrollbar-thumb, #revision-options::-webkit-scrollbar-thumb, #manual-search-results::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        #results::-webkit-scrollbar-thumb:hover, #revision-options::-webkit-scrollbar-thumb:hover, #manual-search-results::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .modal { transition: opacity 0.25s ease; }
