@@ -17,7 +17,7 @@
      <main class="flex-grow flex items-center justify-center">
 
     <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-4xl border border-gray-700">
-        <h1 class="text-3xl font-bold text-center ...">LRC Batch Finder</h1>
+        <h1 class="text-3xl font-bold text-center mb-2">LRC Batch Finder</h1>
         <p class="text-center text-gray-400 mb-6">Select your music folder to automatically find synced lyrics.</p>
 
         <div class="mb-4">
@@ -43,8 +43,10 @@
             <h2 id="results-header" class="text-xl font-semibold mb-2">Results:</h2>
             <div id="results" class="bg-gray-900 border border-gray-700 rounded-lg p-4 h-96 overflow-y-auto space-y-2">
             </div>
+            <!-- UPDATED FORM -->
             <form id="download-form" action="api/download.php" method="post" class="mt-4">
                 <input type="hidden" name="lyrics_data" id="lyrics-data-input">
+                <input type="hidden" name="folder_name" id="folder-name-input">
                 <button type="submit" id="download-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out disabled:opacity-50">
                     Download All Found (.zip)
                 </button>
