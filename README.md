@@ -89,7 +89,7 @@ To run this project locally, you’ll need:
 3. **Place the Database:** Extract and move db.sqlite3 into the lrclib folder.  
 4. Run the Server:  
    cargo run \--release \-- serve \--database db.sqlite3  
-   (The API will be running on http://localhost:3300)
+   (The API will be running on [http://localhost:3300](http://localhost:3300/api/search?q=hello%20adele)
 
 ### **🖥️ Step 2: Configure the PHP Web App**
 
