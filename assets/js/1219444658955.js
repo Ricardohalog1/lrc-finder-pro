@@ -21,7 +21,6 @@ const manualSearchResults = document.getElementById('manual-search-results');
 
 let allSearchResults = {};
 let allFoundLyrics = {};
-// --- NEW ---: Variable to store the selected folder name
 let selectedFolderName = 'SyncedLyrics'; 
 
 function formatDuration(seconds) {
@@ -50,11 +49,10 @@ processBtn.addEventListener('click', async () => {
         .filter(file => /\.(mp3|flac|m4a|ogg|wav)$/i.test(file.name))
         .map(file => ({ fullName: file.name, baseName: file.name.replace(/\.[^/.]+$/, "") }));
 
-    // --- NEW ---: Get folder name from the selected files
     if (files.length > 0 && files[0].webkitRelativePath) {
         selectedFolderName = files[0].webkitRelativePath.split('/')[0];
     } else {
-        selectedFolderName = 'SyncedLyrics'; // Fallback name
+        selectedFolderName = 'SyncedLyrics';
     }
 
     if (musicFiles.length === 0) {
@@ -157,7 +155,7 @@ function updateSummaryAndDownloadButton() {
     
     // --- UPDATED LOGIC ---
     document.getElementById('lyrics-data-input').value = JSON.stringify(allFoundLyrics);
-    document.getElementById('folder-name-input').value = selectedFolderName; // Set the folder name value
+    document.getElementById('folder-name-input').value = selectedFolderName;
     
     const foundCount = syncedCount + plainCount;
     downloadBtn.disabled = foundCount === 0;
@@ -187,7 +185,6 @@ document.addEventListener('contextmenu', function(e) {
     }
 })();
 
-// --- MODAL CONTROLS ---
 function openRevisionModal(baseName) {
     const options = allSearchResults[baseName];
     if (!options) return;
@@ -314,4 +311,5 @@ function createOptionDiv(optionData) {
             </div>
         </div>`;
     return optionDiv;
+
 }
