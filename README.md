@@ -8,7 +8,7 @@
 
 * [Key Features](#-key-features)  
 * [Bonus Utility](#-bonus-utility-file-renamer)  
-* [Tech Stack](https://www.google.com/search?q=%23-tech-stack)  
+* [Tech Stack](#-tech-stack)  
 * [Project Structure](https://www.google.com/search?q=%23-project-structure)  
 * [Setup and Installation](https://www.google.com/search?q=%23-setup-and-installation)  
 * [Usage Guide](https://www.google.com/search?q=%23-usage-guide)  
