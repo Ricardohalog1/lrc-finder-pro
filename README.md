@@ -58,8 +58,8 @@ LRC-Finder-Pro/
 │   ├── css/  
 │   │   └── style.css       \# Custom stylesheets  
 │   └── js/  
-│       ├── batch-finder.js \# JS for index.php (Suggestion: rename 1219444658955.js)  
-│       └── manual-search.js\# JS for search/index.php (Suggestion: rename 1219444622223.js)  
+│       ├── 1219444658955.js)  
+│       └── 1219444622223.js)  
 │  
 ├── includes/  
 │   ├── nav.php             \# Reusable navigation component  
