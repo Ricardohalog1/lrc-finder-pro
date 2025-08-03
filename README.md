@@ -6,7 +6,7 @@
 
 ## **📋 Table of Contents**
 
-* [Key Features](https://www.google.com/search?q=%23-key-features)  
+* [Key Features](#key-features)  
 * [Bonus Utility](https://www.google.com/search?q=%23-bonus-utility-file-renamer)  
 * [Tech Stack](https://www.google.com/search?q=%23-tech-stack)  
 * [Project Structure](https://www.google.com/search?q=%23-project-structure)  
