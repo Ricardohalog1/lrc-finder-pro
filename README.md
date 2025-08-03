@@ -9,11 +9,11 @@
 * [Key Features](#-key-features)  
 * [Bonus Utility](#-bonus-utility-file-renamer)  
 * [Tech Stack](#%EF%B8%8F-tech-stack)  
-* [Project Structure](https://www.google.com/search?q=%23-project-structure)  
-* [Setup and Installation](https://www.google.com/search?q=%23-setup-and-installation)  
-* [Usage Guide](https://www.google.com/search?q=%23-usage-guide)  
-* [License](https://www.google.com/search?q=%23-license)  
-* [Credits and Acknowledgements](https://www.google.com/search?q=%23%EF%B8%8F-credits-and-acknowledgements)
+* [Project Structure](#-project-structure)  
+* [Setup and Installation](#-setup-and-installation)  
+* [Usage Guide](#-usage-guide)  
+* [License](#%EF%B8%8F-license)  
+* [Credits and Acknowledgements](#%EF%B8%8F-credits-and-acknowledgements)
 
 ## **✨ Key Features**
 
