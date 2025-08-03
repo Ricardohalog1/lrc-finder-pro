@@ -11,7 +11,7 @@ lovers and karaoke masters alike.
 
 ## 📋 Table of Contents {#table-of-contents}
 
-- [[Key Features]{.underline}](#key-features)
+- [Key Features](#key-features)
 
 - [[Bonus
   Utility-File-Renamer]{.underline}](#bonus-utility-file-renamer)
