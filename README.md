@@ -2,8 +2,6 @@
 
 **LRC Finder Pro** is a powerful and intuitive web-based utility designed to streamline the process of finding and downloading synchronized lyrics (.lrc files) for your entire local music library. By leveraging a hybrid search system, this tool automates the tedious task of searching for lyrics one by one—perfect for music lovers and karaoke masters alike.
 
-💡 *Tip: This is the perfect spot for a video demo of the application in action!*
-
 ---
 
 ## ✨ Key Features
