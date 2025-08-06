@@ -19,9 +19,38 @@ const manualSearchInput = document.getElementById('manual-search-input');
 const manualSearchBtn = document.getElementById('manual-search-btn');
 const manualSearchResults = document.getElementById('manual-search-results');
 
+const revisionSearchInput = document.getElementById('revision-search-input');
+const revisionSearchBtn = document.getElementById('revision-search-btn');
+const revisionSearchResults = document.getElementById('revision-search-results');
+
+const audioPlayer = document.getElementById('audio-player');
+let musicFileObjects = []; 
+let processedMusicFiles = []; 
+let currentlyPlaying = {
+    element: null,
+    baseName: null,
+    lrcData: [],
+    audioURL: null,
+    lineIndex: -1
+};
+
+let trueDurations = new Map();
+
 let allSearchResults = {};
 let allFoundLyrics = {};
 let selectedFolderName = 'SyncedLyrics'; 
+
+function escapeJsString(str) {
+    if (!str) return '';
+    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    const p = document.createElement('p');
+    p.textContent = str;
+    return p.innerHTML;
+}
 
 function formatDuration(seconds) {
     if (isNaN(seconds) || seconds === 0) return "00:00";
@@ -33,6 +62,17 @@ function formatDuration(seconds) {
 processBtn.addEventListener('click', async () => {
     const files = folderInput.files;
     if (files.length === 0) { alert('You need to select a folder first.'); return; }
+    
+    if (!audioPlayer.paused) {
+        audioPlayer.pause();
+        if (currentlyPlaying.audioURL) URL.revokeObjectURL(currentlyPlaying.audioURL);
+    }
+    currentlyPlaying = { element: null, baseName: null, lrcData: [], audioURL: null, lineIndex: -1 };
+    
+    trueDurations.clear();
+    allSearchResults = {};
+    allFoundLyrics = {};
+
     processBtn.disabled = true;
     processBtn.textContent = 'Processing...';
     statusDiv.textContent = 'Preparing files...';
@@ -42,12 +82,11 @@ processBtn.addEventListener('click', async () => {
     resultsContainer.classList.add('hidden');
     resultsDiv.innerHTML = '';
     downloadBtn.disabled = true;
-    allSearchResults = {};
-    allFoundLyrics = {};
 
-    const musicFiles = Array.from(files)
-        .filter(file => /\.(mp3|flac|m4a|ogg|wav)$/i.test(file.name))
-        .map(file => ({ fullName: file.name, baseName: file.name.replace(/\.[^/.]+$/, "") }));
+    musicFileObjects = Array.from(files).filter(file => /\.(mp3|flac|m4a|ogg|wav)$/i.test(file.name));
+    const musicFiles = musicFileObjects.map(file => ({ fullName: file.name, baseName: file.name.replace(/\.[^/.]+$/, "") }));
+    
+    processedMusicFiles = musicFiles;
 
     if (files.length > 0 && files[0].webkitRelativePath) {
         selectedFolderName = files[0].webkitRelativePath.split('/')[0];
@@ -82,13 +121,14 @@ processBtn.addEventListener('click', async () => {
                     const bestMatch = resultData.results[0];
                     updateResultItem(resultItem, file, bestMatch);
                 } else {
+                   allSearchResults[file.baseName] = [];
                    resultItem.classList.add('p-3', 'rounded-lg', 'text-sm', 'bg-red-800/50', 'border', 'border-red-700');
                    resultItem.innerHTML = `<div class="flex items-center justify-between">
                        <div>
-                           <p class="font-bold">${file.fullName}</p>
+                           <p class="font-bold">${escapeHTML(file.fullName)}</p>
                            <p class="text-red-400 text-xs">Could not find lyrics automatically.</p>
                        </div>
-                       <span class="not-found-badge font-semibold px-2 py-1 bg-red-500 text-white rounded-full text-xs transition-all">✗ Not Found</span>
+                       <button class="not-found-badge font-semibold px-2 py-1 bg-red-500 text-white rounded-full text-xs transition-all">✗ Not Found</button>
                    </div>`;
                 }
                 resultsDiv.appendChild(resultItem);
@@ -118,19 +158,44 @@ function updateResultItem(itemElement, file, matchData) {
     const statusColor = isSynced ? 'green' : 'yellow';
     const statusTextColor = isSynced ? 'white' : 'gray-900';
     const statusText = isSynced ? '✓ Synced' : '✓ Plain';
+    const reviseButtonText = 'Re-sync';
     
-    itemElement.className = `p-3 rounded-lg text-sm bg-${statusColor}-800/50 border border-${statusColor}-700`;
+    const displayDuration = duration;
+    
+    const safeBaseNameForJs = escapeJsString(file.baseName);
+    const safeFullNameForHTML = escapeHTML(file.fullName);
+    const safeTitleForHTML = escapeHTML(title);
+    const safeArtistForHTML = escapeHTML(artist);
+    const safeAlbumForHTML = escapeHTML(album) || 'No album info';
+
+    itemElement.className = `p-3 rounded-lg text-sm bg-gray-800/50 border border-gray-700 transition-all duration-300`;
     itemElement.innerHTML = `
         <div class="flex items-center justify-between">
-            <div class="flex-grow pr-4 min-w-0">
-                <p class="font-bold text-white truncate" title="${file.fullName}">${file.fullName}</p>
-                <p class="text-gray-300 truncate">${title} - ${artist}</p>
-                <p class="text-xs text-gray-400 truncate">${album || 'No album info'}</p>
+            <div class="flex-grow pr-4 min-w-0 cursor-pointer" onclick="togglePlayback(this.closest('[data-filename]'), '${safeBaseNameForJs}', ${isSynced})">
+                <p class="font-bold text-white truncate" title="${safeFullNameForHTML}">${safeFullNameForHTML}</p>
+                <p class="text-gray-300 truncate">${safeTitleForHTML} - ${safeArtistForHTML}</p>
+                <p class="text-xs text-gray-400 truncate">${safeAlbumForHTML}</p>
             </div>
             <div class="flex-shrink-0 flex items-center space-x-3">
-                <span class="font-mono text-lg text-purple-300">${formatDuration(duration)}</span>
-                <span class="font-semibold px-2 py-1 bg-${statusColor}-500 text-${statusTextColor} rounded-full text-xs">${statusText}</span>
-                <button onclick="openRevisionModal('${file.baseName}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg text-xs">Revise</button>
+                <span class="font-mono text-lg text-purple-300">${formatDuration(displayDuration)}</span>
+                <span class="status-badge font-semibold px-2 py-1 bg-${statusColor}-500 text-${statusTextColor} rounded-full text-xs">${statusText}</span>
+                <button onclick="openRevisionModal('${safeBaseNameForJs}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg text-xs">${reviseButtonText}</button>
+            </div>
+        </div>
+        <div class="karaoke-player mt-3 hidden">
+            <div class="karaoke-lyrics-container h-16 flex flex-col items-center justify-center mb-2">
+                <p class="karaoke-lyrics-current text-center text-xl">
+                    <span class="lyrics-text"></span>
+                    <span class="lyrics-fill"></span>
+                </p>
+                <p class="karaoke-lyrics-next text-center text-md font-semibold text-gray-500 transition-opacity duration-300 mt-1"></p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="time-current text-xs font-mono w-10 text-right">00:00</span>
+                <div class="w-full bg-gray-700 rounded-full h-1.5 progress-bar-wrapper">
+                    <div class="progress-bar bg-purple-600 h-1.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <span class="time-duration text-xs font-mono w-10 text-left">${formatDuration(displayDuration)}</span>
             </div>
         </div>`;
     
@@ -141,19 +206,178 @@ function updateResultItem(itemElement, file, matchData) {
     }
 }
 
+// BINAGO: Mas accurate na pag-parse para sa line-level endTime
+function parseLRC(lrcContent) {
+    if (!lrcContent) return [];
+    const lines = lrcContent.split('\n');
+    let timings = [];
+    const lineTimeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
+    
+    for (const line of lines) {
+        const lineMatch = line.match(lineTimeRegex);
+        if (!lineMatch) continue;
+
+        const minutes = parseInt(lineMatch[1], 10);
+        const seconds = parseInt(lineMatch[2], 10);
+        const milliseconds = parseInt(lineMatch[3].padEnd(3, '0'), 10);
+        const time = minutes * 60 + seconds + milliseconds / 1000;
+        
+        // Simpleng pagkuha ng text, tinatanggal ang word timings
+        const plainText = line.replace(lineTimeRegex, '').replace(/<\d{2}:\d{2}\.\d{2,3}>/g, '').replace(/\s+/g, ' ').trim();
+
+        if(plainText) {
+            timings.push({ time, text: plainText });
+        }
+    }
+    
+    timings.sort((a, b) => a.time - b.time);
+
+    // I-calculate ang endTime para sa bawat linya
+    timings = timings.map((line, i) => {
+        const nextLine = timings[i + 1];
+        return {
+            ...line,
+            endTime: nextLine ? nextLine.time : line.time + 5, // Default 5 seconds para sa huling linya
+        };
+    });
+
+    return timings;
+}
+
+
+function resetPlayingUI() {
+    if (currentlyPlaying.element) {
+        currentlyPlaying.element.querySelector('.karaoke-player').classList.add('hidden');
+        currentlyPlaying.element.classList.remove('border-purple-500', 'bg-gray-700/50');
+        currentlyPlaying.element.classList.add('border-gray-700', 'bg-gray-800/50');
+    }
+}
+
+function togglePlayback(element, baseName, isSynced) {
+    if (!element) return;
+    if (currentlyPlaying.baseName === baseName) {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+        } else {
+            audioPlayer.pause();
+        }
+        return;
+    }
+
+    if (!audioPlayer.paused) {
+        audioPlayer.pause();
+        if (currentlyPlaying.audioURL) URL.revokeObjectURL(currentlyPlaying.audioURL);
+    }
+    
+    const fileObject = musicFileObjects.find(f => f.name.startsWith(baseName + '.'));
+    if (!fileObject) {
+        alert('Could not find the music file to play.');
+        return;
+    }
+    
+    const onMetadataLoaded = () => {
+        const realDuration = audioPlayer.duration;
+        trueDurations.set(baseName, realDuration);
+        const playerDurationEl = element.querySelector('.time-duration');
+        if (playerDurationEl) playerDurationEl.textContent = formatDuration(realDuration);
+        audioPlayer.removeEventListener('loadedmetadata', onMetadataLoaded);
+    };
+    
+    audioPlayer.addEventListener('loadedmetadata', onMetadataLoaded);
+
+    const audioURL = URL.createObjectURL(fileObject);
+    audioPlayer.src = audioURL;
+    
+    const lyrics = allFoundLyrics[baseName] || '';
+    
+    resetPlayingUI();
+
+    currentlyPlaying = {
+        element: element,
+        baseName: baseName,
+        lrcData: isSynced ? parseLRC(lyrics) : [],
+        audioURL: audioURL,
+        lineIndex: -1
+    };
+    
+    element.querySelector('.karaoke-player').classList.remove('hidden');
+    element.classList.add('border-purple-500', 'bg-gray-700/50');
+    element.classList.remove('border-gray-700', 'bg-gray-800/50');
+
+    audioPlayer.play();
+}
+
+// BINAGO: Ito na ang pinaka-smooth na animation logic gamit ang CSS Animation
+audioPlayer.addEventListener('timeupdate', () => {
+    if (!currentlyPlaying.element || audioPlayer.paused || !audioPlayer.duration) return;
+
+    const currentTime = audioPlayer.currentTime;
+    const duration = audioPlayer.duration;
+    const progressEl = currentlyPlaying.element.querySelector('.progress-bar');
+    const timeCurrentEl = currentlyPlaying.element.querySelector('.time-current');
+
+    if (progressEl) progressEl.style.width = `${(currentTime / duration) * 100}%`;
+    if (timeCurrentEl) timeCurrentEl.textContent = formatDuration(currentTime);
+
+    const currentLineFillEl = currentlyPlaying.element.querySelector('.lyrics-fill');
+    const currentLineTextEl = currentlyPlaying.element.querySelector('.lyrics-text');
+    const nextLineEl = currentlyPlaying.element.querySelector('.karaoke-lyrics-next');
+
+    if (currentLineFillEl && nextLineEl && currentlyPlaying.lrcData.length > 0) {
+        let newIndex = currentlyPlaying.lrcData.findIndex(line => currentTime >= line.time && currentTime < line.endTime);
+        
+        if (newIndex !== currentlyPlaying.lineIndex) {
+            currentlyPlaying.lineIndex = newIndex;
+
+            const currentLineData = currentlyPlaying.lrcData[newIndex];
+            const nextLineData = currentlyPlaying.lrcData[newIndex + 1];
+
+            // I-reset ang animation
+            currentLineFillEl.classList.remove('animate-fill');
+            // Force reflow para ma-restart ang animation
+            void currentLineFillEl.offsetWidth;
+
+            if (currentLineData) {
+                const lineDuration = currentLineData.endTime - currentLineData.time;
+                const timeIntoLine = currentTime - currentLineData.time;
+
+                currentLineTextEl.textContent = currentLineData.text;
+                currentLineFillEl.textContent = currentLineData.text;
+                nextLineEl.textContent = nextLineData ? nextLineData.text : '';
+
+                // I-set ang animation properties at i-trigger ito
+                currentLineFillEl.style.animationDuration = `${lineDuration}s`;
+                currentLineFillEl.style.animationDelay = `-${timeIntoLine}s`;
+                currentLineFillEl.classList.add('animate-fill');
+            } else {
+                // Kung walang current line (nasa intro/outro), i-clear
+                currentLineTextEl.textContent = '';
+                currentLineFillEl.textContent = '';
+                nextLineEl.textContent = currentlyPlaying.lrcData[0]?.text || '';
+            }
+        }
+    }
+});
+
+
+audioPlayer.addEventListener('ended', () => {
+    resetPlayingUI();
+    if(currentlyPlaying.audioURL) URL.revokeObjectURL(currentlyPlaying.audioURL);
+    currentlyPlaying = { element: null, baseName: null, lrcData: [], audioURL: null, lineIndex: -1 };
+});
+
 function updateSummaryAndDownloadButton() {
     let syncedCount = 0, plainCount = 0;
     const totalFiles = resultsDiv.children.length;
 
     document.querySelectorAll('[data-filename]').forEach(item => {
-        const badge = item.querySelector('.font-semibold');
+        const badge = item.querySelector('.status-badge');
         if (badge && badge.textContent.includes('Synced')) syncedCount++;
         else if (badge && badge.textContent.includes('Plain')) plainCount++;
     });
     const notFoundCount = totalFiles - (syncedCount + plainCount);
     resultsHeader.textContent = `Results: ${syncedCount} synced, ${plainCount} plain, ${notFoundCount} not found.`;
     
-    // --- UPDATED LOGIC ---
     document.getElementById('lyrics-data-input').value = JSON.stringify(allFoundLyrics);
     document.getElementById('folder-name-input').value = selectedFolderName;
     
@@ -165,46 +389,55 @@ document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
 
-(function(){
-    const _0xblock = 'ZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcigna2V5ZG93bicsIGZ1bmN0aW9uKGUpeyBpZihlLmtleT09PSdGMTInfHxlLmtleUNvZGU9PT0xMjMpeyBlLnByZXZlbnREZWZhdWx0KCk7fSBpZihlLmN0cmxLZXkmJmUuc2hpZnRLZXkmJihlLmtleT09PSdJJ3x8ZS5rZXk9PT0naScpKXsgZS5wcmV2ZW50RGVmYXVsdCgpO30gaWYoZS5jdHJsS2V5JiZlLnNoaWZ0S2V5JiYoZS5rZXk9PT0nSid8fGUua2V5PT09J2onKSkgeyBlLnByZXZlbnREZWZhdWx0KCk7fSBpZihlLmN0cmxLZXkmJmUuc2hpZnRLZXkmJihlLmtleT09PSdDJ3x8ZS5rZXk9PT0nYycpKSB7IGUucHJldmVudERlZmF1bHQoKTt9IGlmKGUuY3RybEtleSYmKGUua2V5PT09J1UnfHxlLmtleT09PSd1JykpIHsgZS5wcmV2ZW50RGVmYXVsdCgpO30gfSk7';
-    new Function(atob(_0xblock))();
-})();
-
-(function() {
-    const _0xexp = 'MjAyNS0wOC0xMA==';
-    const _0xmsg = 'QVBQTElDQVRJT04gTElDRU5TRSBFWFBJUkVE';
-    try {
-        const expiryDate = new Date(atob(_0xexp));
-        const currentDate = new Date();
-
-        if (currentDate > expiryDate) {
-            document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:red;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:2rem;text-align:center;">' + atob(_0xmsg) + '</div>';
-        }
-    } catch (e) {
-        document.body.innerHTML = ''; 
-    }
-})();
-
 function openRevisionModal(baseName) {
     const options = allSearchResults[baseName];
     if (!options) return;
     revisionTitle.textContent = `Choose lyrics for: ${baseName}`;
+    revisionModal.dataset.editingFile = baseName;
     revisionOptions.innerHTML = ''; 
-    options.forEach((option, index) => {
+    options.forEach((option) => {
         const optionDiv = createOptionDiv(option);
-        optionDiv.addEventListener('click', () => selectRevision(baseName, index));
+        optionDiv.addEventListener('click', () => selectRevision(baseName, option));
         revisionOptions.appendChild(optionDiv);
     });
+
+    revisionOptions.classList.remove('hidden');
+    revisionSearchResults.classList.add('hidden');
+    revisionSearchInput.value = '';
+    revisionSearchResults.innerHTML = '';
+
     revisionModal.classList.remove('hidden');
 }
 
-function selectRevision(baseName, optionIndex) {
-    const selectedMatch = allSearchResults[baseName][optionIndex];
-    const resultItem = resultsDiv.querySelector(`[data-filename="${baseName}"]`);
-    const file = { fullName: `${baseName}.mp3`, baseName: baseName }; 
-    updateResultItem(resultItem, file, selectedMatch);
+function selectRevision(baseName, selectedMatch) { 
+    const wasPlaying = currentlyPlaying.baseName === baseName;
+    if (wasPlaying) {
+        audioPlayer.pause();
+        resetPlayingUI();
+        if (currentlyPlaying.audioURL) {
+            URL.revokeObjectURL(currentlyPlaying.audioURL);
+        }
+    }
+    
+    const safeBaseNameForSelector = baseName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const resultItem = resultsDiv.querySelector(`[data-filename="${safeBaseNameForSelector}"]`);
+    
+    const originalFile = processedMusicFiles.find(f => f.baseName === baseName) || { fullName: `${baseName}.mp3`, baseName: baseName };
+    
+    const existingIndex = allSearchResults[baseName].findIndex(r => r.lyrics === selectedMatch.lyrics && r.title === selectedMatch.title);
+    if (existingIndex === -1) {
+        allSearchResults[baseName].unshift(selectedMatch);
+    }
+
+    updateResultItem(resultItem, originalFile, selectedMatch);
     updateSummaryAndDownloadButton();
     closeModal('revision-modal');
+
+    if (wasPlaying) {
+        currentlyPlaying = { element: null, baseName: null, lrcData: [], audioURL: null, lineIndex: -1 };
+        const updatedResultItem = resultsDiv.querySelector(`[data-filename="${safeBaseNameForSelector}"]`);
+        togglePlayback(updatedResultItem, baseName, selectedMatch.status === 'synced');
+    }
 }
 
 function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
@@ -249,12 +482,10 @@ async function performManualSearch() {
     if (!query) return;
 
     manualSearchResults.innerHTML = '<p class="text-purple-400 text-center">Searching...</p>';
-
     try {
         const response = await fetch(`./api/search.php?q=${encodeURIComponent(query)}`);
         const results = await response.json();
         manualSearchResults.innerHTML = '';
-
         if (results && results.length > 0) {
             const standardizedResults = results.map(res => ({
                 artist: res.artistName ?? 'Unknown Artist',
@@ -280,13 +511,17 @@ async function performManualSearch() {
 
 function selectManualResult(selectedMatch) {
     const baseName = manualSearchModal.dataset.editingFile;
-    const resultItem = resultsDiv.querySelector(`[data-filename="${baseName}"]`);
-    const file = { fullName: `${baseName}.mp3`, baseName: baseName };
+    const safeBaseNameForSelector = baseName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const resultItem = resultsDiv.querySelector(`[data-filename="${safeBaseNameForSelector}"]`);
+    
+    const originalFile = processedMusicFiles.find(f => f.baseName === baseName) || { fullName: `${baseName}.mp3`, baseName: baseName };
 
-    if (!allSearchResults[baseName]) allSearchResults[baseName] = [];
+    if (!Array.isArray(allSearchResults[baseName])) {
+        allSearchResults[baseName] = [];
+    }
     allSearchResults[baseName].unshift(selectedMatch);
 
-    updateResultItem(resultItem, file, selectedMatch);
+    updateResultItem(resultItem, originalFile, selectedMatch);
     updateSummaryAndDownloadButton();
     closeModal('manual-search-modal');
 }
@@ -301,9 +536,9 @@ function createOptionDiv(optionData) {
     optionDiv.innerHTML = `
         <div class="flex items-center justify-between">
             <div class="flex-grow pr-4 min-w-0">
-                <p class="font-bold text-white truncate">${title}</p>
-                <p class="text-sm text-gray-300 truncate">${artist}</p>
-                <p class="text-xs text-gray-400 truncate">${album || 'No album info'}</p>
+                <p class="font-bold text-white truncate">${escapeHTML(title)}</p>
+                <p class="text-sm text-gray-300 truncate">${escapeHTML(artist)}</p>
+                <p class="text-xs text-gray-400 truncate">${escapeHTML(album) || 'No album info'}</p>
             </div>
             <div class="flex-shrink-0 flex items-center space-x-3">
                  <span class="font-mono text-lg text-purple-300">${formatDuration(duration)}</span>
@@ -311,5 +546,45 @@ function createOptionDiv(optionData) {
             </div>
         </div>`;
     return optionDiv;
+}
 
+revisionSearchBtn.addEventListener('click', performRevisionSearch);
+revisionSearchInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') performRevisionSearch();
+});
+
+async function performRevisionSearch() {
+    const query = revisionSearchInput.value.trim();
+    if (!query) return;
+
+    revisionOptions.classList.add('hidden');
+    revisionSearchResults.classList.remove('hidden');
+    revisionSearchResults.innerHTML = '<p class="text-purple-400 text-center">Searching...</p>';
+    const baseName = revisionModal.dataset.editingFile;
+
+    try {
+        const response = await fetch(`./api/search.php?q=${encodeURIComponent(query)}`);
+        const results = await response.json();
+        revisionSearchResults.innerHTML = '';
+        if (results && results.length > 0) {
+            const standardizedResults = results.map(res => ({
+                artist: res.artistName ?? 'Unknown Artist',
+                title: res.trackName ?? 'Unknown Title',
+                album: res.albumName ?? 'Unknown Album',
+                duration: res.duration ?? 0,
+                lyrics: res.syncedLyrics || res.plainLyrics,
+                status: res.syncedLyrics ? 'synced' : 'plain'
+            }));
+
+            standardizedResults.forEach(result => {
+                const optionDiv = createOptionDiv(result);
+                optionDiv.addEventListener('click', () => selectRevision(baseName, result));
+                revisionSearchResults.appendChild(optionDiv);
+            });
+        } else {
+            revisionSearchResults.innerHTML = '<p class="text-red-400 text-center">No results found for that query.</p>';
+        }
+    } catch (error) {
+        revisionSearchResults.innerHTML = `<p class="text-red-400 text-center">An error occurred: ${error.message}</p>`;
+    }
 }
