@@ -1,3 +1,6 @@
+<?php 
+include 'includes/version.php'; 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +46,6 @@
             <h2 id="results-header" class="text-xl font-semibold mb-2">Results:</h2>
             <div id="results" class="bg-gray-900 border border-gray-700 rounded-lg p-4 h-96 overflow-y-auto space-y-2">
             </div>
-            <!-- UPDATED FORM -->
             <form id="download-form" action="api/download.php" method="post" class="mt-4">
                 <input type="hidden" name="lyrics_data" id="lyrics-data-input">
                 <input type="hidden" name="folder_name" id="folder-name-input">
@@ -55,10 +57,20 @@
     </div>
     
     <div id="revision-modal" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700">
-            <div class="p-6 border-b border-gray-700"><h3 class="text-xl font-bold text-purple-400" id="revision-title">Choose Correct Lyrics</h3></div>
-            <div id="revision-options" class="p-6 max-h-[60vh] overflow-y-auto space-y-3"></div>
-            <div class="p-4 bg-gray-800/50 border-t border-gray-700 rounded-b-2xl"><button onclick="closeModal('revision-modal')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button></div>
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-700 flex flex-col">
+            <div class="p-6 border-b border-gray-700">
+                <h3 class="text-xl font-bold text-purple-400" id="revision-title">Choose Correct Lyrics</h3>
+                <div class="mt-4 flex space-x-2">
+                    <input type="text" id="revision-search-input" placeholder="Search again..." class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button id="revision-search-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Search</button>
+                </div>
+            </div>
+            <div id="revision-options" class="p-6 max-h-[40vh] overflow-y-auto space-y-3 flex-grow">
+                </div>
+            <div id="revision-search-results" class="p-6 max-h-[40vh] overflow-y-auto space-y-3 border-t border-gray-700 hidden"></div>
+            <div class="p-4 bg-gray-800/50 border-t border-gray-700 rounded-b-2xl">
+                 <button onclick="closeModal('revision-modal')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -80,6 +92,9 @@
         </div>
     </div>
     </main>
+
+    <audio id="audio-player" class="hidden"></audio>
+
     <?php include 'includes/footer.php'; ?>
     
     <script src="assets/js/1219444658955.js"></script>
